@@ -1,0 +1,6729 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Wedding Planner</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary: #8f5f5f;
+    --primary-dark: #704747;
+    --accent: #a86f6f;
+    --soft: #eee2df;
+    --background: #f8f4f2;
+    --text: #3d3030;
+    --muted: #8b7777;
+    --danger: #c45f5f;
+    --success: #5d8b67;
+    --white: #ffffff;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background: var(--background);
+    color: var(--text);
+    padding-bottom: 90px;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.container {
+    width: 92%;
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* =========================================================
+   AUTH PAGE
+========================================================= */
+
+.auth-page {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        linear-gradient(
+            rgba(55,35,35,.55),
+            rgba(55,35,35,.65)
+        ),
+        url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1600&q=80")
+        center/cover;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 430px;
+
+    background: rgba(255,255,255,.97);
+
+    border-radius: 25px;
+
+    padding: 35px 30px;
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.25);
+
+    text-align: center;
+}
+
+.auth-logo {
+    font-size: 45px;
+    margin-bottom: 5px;
+}
+
+.auth-card h1 {
+    font-family: "Playfair Display", serif;
+    color: var(--primary-dark);
+    margin-bottom: 5px;
+}
+
+.auth-subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 25px;
+}
+
+.auth-card h2 {
+    font-family: "Playfair Display", serif;
+    margin-bottom: 20px;
+}
+
+.auth-input {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.auth-input label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+.auth-input input {
+    width: 100%;
+    padding: 13px 14px;
+
+    border: 1px solid #e3d7d3;
+    border-radius: 12px;
+
+    outline: none;
+}
+
+.auth-input input:focus {
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 0 3px rgba(168,111,111,.1);
+}
+
+.auth-button {
+    width: 100%;
+
+    border: 0;
+
+    padding: 13px;
+
+    border-radius: 12px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-weight: 600;
+
+    margin-top: 5px;
+
+    transition: .2s;
+}
+
+.auth-button:hover {
+    background: var(--primary-dark);
+}
+
+.auth-switch {
+    margin-top: 18px;
+
+    font-size: 13px;
+
+    color: var(--muted);
+}
+
+.auth-switch button {
+    border: 0;
+    background: none;
+
+    color: var(--primary);
+
+    font-weight: 700;
+}
+
+.auth-message {
+    min-height: 22px;
+
+    margin-top: 15px;
+
+    font-size: 13px;
+}
+
+.auth-message.error {
+    color: var(--danger);
+}
+
+.auth-message.success {
+    color: var(--success);
+}
+
+
+/* =========================================================
+   USER BAR
+========================================================= */
+
+.user-bar {
+    background: white;
+
+    border-bottom: 1px solid var(--soft);
+
+    padding: 9px 15px;
+}
+
+.user-bar-inner {
+    width: 92%;
+    max-width: 1100px;
+
+    margin: auto;
+
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.user-email {
+    font-size: 12px;
+    color: var(--muted);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logout-button {
+    border: 0;
+
+    padding: 8px 13px;
+
+    border-radius: 9px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.logout-button:hover {
+    background: var(--primary-dark);
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+    min-height: 430px;
+
+    background:
+        linear-gradient(
+            rgba(55,35,35,.48),
+            rgba(55,35,35,.55)
+        ),
+        url("https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=1600&q=80")
+        center/cover;
+
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    padding: 50px 20px;
+}
+
+.hero-content {
+    width: 100%;
+}
+
+.hero-small {
+    font-size: 15px;
+
+    letter-spacing: 4px;
+
+    text-transform: uppercase;
+
+    margin-bottom: 15px;
+}
+
+.couple-name {
+    font-family: "Great Vibes", cursive;
+
+    font-size: 65px;
+
+    line-height: 1.1;
+
+    margin-bottom: 15px;
+
+    color: white;
+
+    word-break: break-word;
+}
+
+.hero-date {
+    font-size: 17px;
+}
+
+.hero-location {
+    margin-top: 8px;
+
+    font-size: 14px;
+
+    opacity: .95;
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+.countdown {
+    margin: 30px auto 0;
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 12px;
+
+    flex-wrap: wrap;
+}
+
+.time-box {
+    min-width: 80px;
+
+    padding: 12px 10px;
+
+    border-radius: 15px;
+
+    background: rgba(255,255,255,.15);
+
+    backdrop-filter: blur(8px);
+}
+
+.time-box strong {
+    display: block;
+
+    font-size: 25px;
+}
+
+.time-box span {
+    font-size: 11px;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.page {
+    display: none;
+
+    padding: 30px 0;
+}
+
+.page.active {
+    display: block;
+}
+
+.section-title {
+    font-family: "Playfair Display", serif;
+
+    font-size: 27px;
+
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 22px;
+
+    margin-bottom: 20px;
+
+    box-shadow:
+        0 8px 25px rgba(70,40,40,.07);
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.stats {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+}
+
+.stat {
+    padding: 20px;
+
+    border-radius: 18px;
+
+    background: white;
+
+    box-shadow:
+        0 7px 20px rgba(70,40,40,.06);
+}
+
+.stat small {
+    display: block;
+
+    color: var(--muted);
+
+    margin-bottom: 8px;
+}
+
+.stat strong {
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   PROGRESS
+========================================================= */
+
+.progress-card {
+    text-align: center;
+}
+
+.progress-title {
+    font-family: "Playfair Display", serif;
+
+    font-size: 23px;
+
+    margin-bottom: 22px;
+}
+
+.progress-circle {
+    width: 190px;
+    height: 190px;
+
+    margin: 0 auto 20px;
+
+    border-radius: 50%;
+
+    background:
+        conic-gradient(
+            var(--accent) 0deg,
+            var(--accent) 0deg,
+            #eee5e2 0deg
+        );
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    transition: .5s;
+}
+
+.progress-circle::before {
+    content: "";
+
+    width: 145px;
+    height: 145px;
+
+    background: white;
+
+    border-radius: 50%;
+
+    position: absolute;
+}
+
+.progress-number {
+    position: relative;
+
+    z-index: 2;
+
+    font-size: 38px;
+
+    font-weight: 700;
+
+    color: var(--primary);
+}
+
+.progress-info {
+    margin-bottom: 18px;
+}
+
+.progress-info strong {
+    font-size: 17px;
+}
+
+.progress-info span {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+.progress-wrapper {
+    margin-top: 18px;
+
+    text-align: left;
+}
+
+.progress-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-bottom: 8px;
+}
+
+.progress {
+    height: 14px;
+
+    background: #eee5e2;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+
+    width: 0%;
+
+    background: var(--accent);
+
+    border-radius: 20px;
+
+    transition: .5s;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border: 1px solid #e3d7d3;
+
+    border-radius: 12px;
+
+    outline: none;
+
+    background: white;
+
+    color: var(--text);
+}
+
+input:focus {
+    border-color: var(--accent);
+
+    box-shadow:
+        0 0 0 3px rgba(168,111,111,.1);
+}
+
+input[type="color"] {
+    width: 65px;
+    height: 45px;
+
+    padding: 4px;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.btn {
+    border: 0;
+
+    padding: 12px 17px;
+
+    border-radius: 12px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-weight: 600;
+
+    transition: .2s;
+}
+
+.btn:hover {
+    background: var(--primary-dark);
+}
+
+.btn.secondary {
+    background: #777;
+}
+
+.btn.danger {
+    background: var(--danger);
+}
+
+.btn.light {
+    background: var(--soft);
+
+    color: var(--text);
+}
+
+.form-actions {
+    margin-top: 18px;
+
+    display: flex;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
+}
+
+.color-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.color-preview-name {
+    font-family: "Great Vibes", cursive;
+
+    font-size: 28px;
+}
+
+
+/* =========================================================
+   LIST
+========================================================= */
+
+.list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.list-item {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    background: #faf7f6;
+
+    border-radius: 14px;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-info strong {
+    display: block;
+
+    margin-bottom: 3px;
+}
+
+.item-info small {
+    color: var(--muted);
+}
+
+.item-actions {
+    display: flex;
+
+    gap: 7px;
+
+    flex-wrap: wrap;
+}
+
+.small-btn {
+    border: 0;
+
+    padding: 7px 10px;
+
+    border-radius: 9px;
+
+    font-size: 12px;
+
+    background: var(--primary);
+
+    color: white;
+}
+
+.small-btn.delete {
+    background: var(--danger);
+}
+
+.small-btn.edit {
+    background: #777;
+}
+
+
+/* =========================================================
+   CHECKLIST
+========================================================= */
+
+.category {
+    margin-bottom: 18px;
+}
+
+.category-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+
+    padding: 13px 15px;
+
+    background: var(--soft);
+
+    border-radius: 13px;
+}
+
+.category-header strong {
+    font-family: "Playfair Display", serif;
+
+    font-size: 18px;
+}
+
+.check-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    background: #faf7f6;
+
+    padding: 12px;
+
+    border-radius: 12px;
+
+    margin-bottom: 7px;
+}
+
+.check-item input {
+    width: 18px;
+    height: 18px;
+}
+
+.check-item.done .task-name {
+    text-decoration: line-through;
+
+    opacity: .5;
+}
+
+.task-name {
+    flex: 1;
+
+    font-size: 14px;
+}
+
+.add-row {
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+}
+
+.add-row input {
+    flex: 1;
+}
+
+
+/* =========================================================
+   BUDGET
+========================================================= */
+
+.budget-summary {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+.budget-box {
+    padding: 15px;
+
+    background: #faf7f6;
+
+    border-radius: 14px;
+}
+
+.budget-box small {
+    display: block;
+
+    color: var(--muted);
+
+    margin-bottom: 5px;
+}
+
+.budget-box strong {
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   PREWEDDING GALLERY
+========================================================= */
+
+.prewed-gallery-card {
+    overflow: hidden;
+}
+
+.prewed-gallery-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.prewed-gallery-header h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 21px;
+    margin-bottom: 4px;
+}
+
+.prewed-gallery-header p {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.prewed-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--primary);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: .2s;
+}
+
+.prewed-upload-btn:hover {
+    background: var(--primary-dark);
+}
+
+.prewed-upload-btn input {
+    display: none;
+}
+
+.prewed-gallery-wrap {
+    position: relative;
+}
+
+.prewed-gallery {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 4px 2px 12px;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+}
+
+.prewed-gallery.dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+}
+
+.prewed-gallery::-webkit-scrollbar {
+    height: 8px;
+}
+
+.prewed-gallery::-webkit-scrollbar-thumb {
+    background: #d8c7c3;
+    border-radius: 20px;
+}
+
+.prewed-photo-card {
+    flex: 0 0 250px;
+    height: 315px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #eee5e2;
+    scroll-snap-align: start;
+    box-shadow: 0 8px 22px rgba(61,48,48,.10);
+}
+
+.prewed-photo-card img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.prewed-photo-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(61,48,48,.78);
+    color: white;
+    font-size: 17px;
+    display: grid;
+    place-items: center;
+    z-index: 2;
+}
+
+.prewed-photo-delete:hover {
+    background: var(--danger);
+}
+
+.prewed-gallery-status {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    .prewed-gallery-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .prewed-upload-btn {
+        width: 100%;
+    }
+
+    .prewed-photo-card {
+        flex-basis: 82vw;
+        height: 330px;
+    }
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.bottom-nav {
+    position: fixed;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 100;
+
+    background: white;
+
+    border-top: 1px solid var(--soft);
+
+    display: flex;
+
+    justify-content: center;
+
+    box-shadow:
+        0 -5px 20px rgba(0,0,0,.06);
+}
+
+.nav-inner {
+    width: 100%;
+
+    max-width: 900px;
+
+    display: flex;
+
+    overflow-x: auto;
+}
+
+.nav-btn {
+    flex: 1;
+
+    min-width: 75px;
+
+    padding: 12px 5px;
+
+    background: white;
+
+    border: 0;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.nav-btn span {
+    display: block;
+
+    font-size: 20px;
+
+    margin-bottom: 3px;
+}
+
+.nav-btn.active {
+    color: var(--primary);
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.empty {
+    text-align: center;
+
+    padding: 25px;
+
+    color: #9b8989;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.loading {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 99998;
+
+    background: var(--background);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.loading-icon {
+    font-size: 45px;
+}
+
+.loading-text {
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+    position: fixed;
+
+    top: 20px;
+    right: 20px;
+
+    z-index: 200;
+
+    background: #3d3030;
+
+    color: white;
+
+    padding: 13px 17px;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.18);
+
+    opacity: 0;
+
+    transform: translateY(-10px);
+
+    pointer-events: none;
+
+    transition: .25s;
+}
+
+.toast.show {
+    opacity: 1;
+
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:700px) {
+
+    .couple-name {
+        font-size: 48px;
+    }
+
+    .hero {
+        min-height: 390px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+    .budget-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .list-item {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .item-actions {
+        width: 100%;
+    }
+
+    .item-actions button {
+        flex: 1;
+    }
+
+    .add-row {
+        flex-direction: column;
+    }
+
+    .countdown {
+        gap: 7px;
+    }
+
+    .time-box {
+        min-width: 68px;
+    }
+
+    .time-box strong {
+        font-size: 21px;
+    }
+
+    .progress-circle {
+        width: 165px;
+        height: 165px;
+    }
+
+    .progress-circle::before {
+        width: 125px;
+        height: 125px;
+    }
+
+    .category-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .category-header .item-actions {
+        width: 100%;
+    }
+
+    .auth-card {
+        padding: 28px 20px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =========================================================
+   LOADING
+========================================================= -->
+
+<div class="loading" id="loadingScreen">
+
+    <div class="loading-icon">
+        💍
+    </div>
+
+    <div class="loading-text">
+        Memuat Wedding Planner...
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+   LOGIN / REGISTER
+========================================================= -->
+
+<div class="auth-page" id="authPage" style="display:none;">
+
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            💍
+        </div>
+
+        <h1>
+            Wedding Planner
+        </h1>
+
+        <p class="auth-subtitle">
+            Rencanakan hari bahagiamu dengan lebih mudah
+        </p>
+
+
+        <!-- LOGIN -->
+
+        <div id="loginForm">
+
+            <h2>
+                Selamat Datang ❤️
+            </h2>
+
+            <div class="auth-input">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Masukkan email"
+                    autocomplete="email">
+
+            </div>
+
+
+            <div class="auth-input">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Masukkan password"
+                    autocomplete="current-password">
+
+            </div>
+
+
+            <button
+                class="auth-button"
+                data-action="login">
+
+                Login
+
+            </button>
+
+
+            <p class="auth-switch">
+
+                Belum punya akun?
+
+                <button data-action="show-register">
+                    Daftar sekarang
+                </button>
+
+            </p>
+
+        </div>
+
+
+        <!-- REGISTER -->
+
+        <div
+            id="registerForm"
+            style="display:none;">
+
+            <h2>
+                Buat Akun 💕
+            </h2>
+
+
+            <div class="auth-input">
+
+                <label>
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    placeholder="Masukkan email"
+                    autocomplete="email">
+
+            </div>
+
+
+            <div class="auth-input">
+
+                <label>
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Minimal 6 karakter"
+                    autocomplete="new-password">
+
+            </div>
+
+
+            <div class="auth-input">
+
+                <label>
+                    Konfirmasi Password
+                </label>
+
+                <input
+                    type="password"
+                    id="registerConfirmPassword"
+                    placeholder="Ulangi password"
+                    autocomplete="new-password">
+
+            </div>
+
+
+            <button
+                class="auth-button"
+                data-action="register">
+
+                Daftar
+
+            </button>
+
+
+            <p class="auth-switch">
+
+                Sudah punya akun?
+
+                <button data-action="show-login">
+                    Login
+                </button>
+
+            </p>
+
+        </div>
+
+
+        <p
+            id="authMessage"
+            class="auth-message">
+        </p>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+   USER BAR
+========================================================= -->
+
+<div
+    class="user-bar"
+    id="userBar"
+    style="display:none;">
+
+    <div class="user-bar-inner">
+
+        <div class="user-email">
+            👤 <span id="currentUserEmail"></span>
+        </div>
+
+        <button
+            class="logout-button"
+            data-action="logout">
+
+            🚪 Logout
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+   HERO
+========================================================= -->
+
+<header class="hero">
+
+    <div class="hero-content">
+
+        <div class="hero-small">
+            Wedding Planner
+        </div>
+
+
+        <div
+            class="couple-name"
+            id="heroCouple">
+
+            Nama & Pengantin
+
+        </div>
+
+
+        <div
+            class="hero-date"
+            id="heroDate">
+
+            📅 Tentukan tanggal pernikahan
+
+        </div>
+
+
+        <div
+            class="hero-location"
+            id="heroLocation">
+        </div>
+
+
+        <div class="countdown">
+
+            <div class="time-box">
+
+                <strong id="days">
+                    0
+                </strong>
+
+                <span>
+                    Hari
+                </span>
+
+            </div>
+
+
+            <div class="time-box">
+
+                <strong id="hours">
+                    0
+                </strong>
+
+                <span>
+                    Jam
+                </span>
+
+            </div>
+
+
+            <div class="time-box">
+
+                <strong id="minutes">
+                    0
+                </strong>
+
+                <span>
+                    Menit
+                </span>
+
+            </div>
+
+
+            <div class="time-box">
+
+                <strong id="seconds">
+                    0
+                </strong>
+
+                <span>
+                    Detik
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- =========================================================
+   DASHBOARD
+========================================================= -->
+
+<section
+    class="page active"
+    id="dashboard">
+
+    <div class="container">
+
+        <h2 class="section-title">
+            Dashboard
+        </h2>
+
+
+        <div class="card progress-card">
+
+            <div class="progress-title">
+                Progress Persiapan Pernikahan
+            </div>
+
+
+            <div
+                class="progress-circle"
+                id="progressCircle">
+
+                <div
+                    class="progress-number"
+                    id="progressNumber">
+
+                    0%
+
+                </div>
+
+            </div>
+
+
+            <div class="progress-info">
+
+                <strong id="progressText">
+                    0 dari 0 tugas selesai
+                </strong>
+
+                <br>
+
+                <span>
+                    Target: 100% persiapan selesai
+                </span>
+
+            </div>
+
+
+            <div class="progress-wrapper">
+
+                <div class="progress-header">
+
+                    <strong>
+                        Progress Checklist
+                    </strong>
+
+                    <strong id="progressPercent">
+                        0%
+                    </strong>
+
+                </div>
+
+
+                <div class="progress">
+
+                    <div
+                        class="progress-bar"
+                        id="checklistProgress">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="stats">
+
+            <div class="stat">
+
+                <small>
+                    Total Budget
+                </small>
+
+                <strong id="totalBudget">
+                    Rp0
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <small>
+                    Budget Terpakai
+                </small>
+
+                <strong id="usedBudget">
+                    Rp0
+                </strong>
+
+            </div>
+
+
+            <div class="stat">
+
+                <small>
+                    Sisa Budget
+                </small>
+
+                <strong id="remainingBudget">
+                    Rp0
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3 style="margin-bottom:10px;">
+                Selamat Datang 💍
+            </h3>
+
+            <p>
+                Gunakan Wedding Planner untuk mengatur
+                seluruh persiapan pernikahan mulai dari
+                checklist, anggaran, tamu, vendor sampai
+                rundown acara.
+            </p>
+
+        </div>
+
+        <div class="card prewed-gallery-card">
+
+            <div class="prewed-gallery-header">
+
+                <div>
+                    <h3>📸 Galeri Prewed</h3>
+                    <p>Upload dan geser foto momen spesial kalian.</p>
+                </div>
+
+                <label class="prewed-upload-btn">
+                    + Upload Foto
+                    <input
+                        type="file"
+                        id="prewedPhotoInput"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple>
+                </label>
+
+            </div>
+
+            <div class="prewed-gallery-wrap">
+
+                <div
+                    class="prewed-gallery"
+                    id="prewedGallery">
+
+                    <div class="empty">
+                        Belum ada foto prewed.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="prewed-gallery-status"
+                id="prewedGalleryStatus">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+   PROFILE
+========================================================= -->
+
+<section
+    class="page"
+    id="profile">
+
+    <div class="container">
+
+        <h2 class="section-title">
+            Data Pengantin
+        </h2>
+
+
+        <div class="card">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        Nama Pengantin Pria
+                    </label>
+
+                    <input
+                        id="groomName"
+                        placeholder="Contoh: Ahmad">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Nama Pengantin Wanita
+                    </label>
+
+                    <input
+                        id="brideName"
+                        placeholder="Contoh: Aisyah">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Tanggal Pernikahan
+                    </label>
+
+                    <input
+                        type="date"
+                        id="weddingDate">
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label>
+                        Tempat / Lokasi Pernikahan
+                    </label>
+
+                    <input
+                        id="weddingLocation"
+                        placeholder="Contoh: Gedung Serbaguna">
+
+                </div>
+
+
+                <div class="form-group full">
+
+                    <label>
+                        Warna Nama Pengantin
+                    </label>
+
+                    <div class="color-row">
+
+                        <input
+                            type="color"
+                            id="coupleNameColor"
+                            value="#ffffff">
+
+                        <span id="colorPreview">
+
+                            <span class="color-preview-name">
+                                Nama & Nama
+                            </span>
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    class="btn"
+                    data-action="save-profile">
+
+                    💾 Simpan Data
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+   BUDGET
+========================================================= -->
+
+<section
+    class="page"
+    id="budget">
+
+    <div class="container">
+
+        <h2 class="section-title">
+            Budget Planner
+        </h2>
+
+
+        <div class="card">
+
+            <div class="budget-summary">
+
+                <div class="budget-box">
+
+                    <small>
+                        Total Budget
+                    </small>
+
+                    <strong id="budgetTotal2">
+                        Rp0
+                    </strong>
+
+                </div>
+
+
+                <div class="budget-box">
+
+                    <small>
+                        Terpakai
+                    </small>
+
+                    <strong id="budgetUsed2">
+                        Rp0
+                    </strong>
+
+                </div>
+
+
+                <div class="budget-box">
+
+                    <small>
+                        Sisa
+                    </small>
+
+                    <strong id="budgetRemaining2">
+                        Rp0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        Nama Pengeluaran
+                    </label>
+
+                    <input
+                        id="budgetName"
+                        placeholder="Contoh: Gedung">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Anggaran
+                    </label>
+
+                    <input
+                        type="number"
+                        min="0"
+                        id="budgetAmount"
+                        placeholder="5000000">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Sudah Terpakai
+                    </label>
+
+                    <input
+                        type="number"
+                        min="0"
+                        id="budgetSpent"
+                        placeholder="1000000">
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    class="btn"
+                    data-action="add-budget">
+
+                    + Tambah Budget
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div
+                class="list"
+                id="budgetList">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+   CHECKLIST
+========================================================= -->
+
+<section
+    class="page"
+    id="checklist">
+
+    <div class="container">
+
+        <h2 class="section-title">
+            Checklist Pernikahan
+        </h2>
+
+
+        <div class="card">
+
+            <div class="add-row">
+
+                <input
+                    id="newCategory"
+                    placeholder="Contoh: 6 Bulan Sebelum">
+
+                <button
+                    class="btn"
+                    data-action="add-category">
+
+                    + Tambah Periode
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div id="checklistContainer">
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+   GUEST
+========================================================= -->
+
+<section
+    class="page"
+    id="guests">
+
+    <div class="container">
+
+        <h2 class="section-title">
+            Daftar Tamu
+        </h2>
+
+
+        <div class="card">
+
+            <div class="add-row">
+
+                <input
+                    id="guestName"
+                    placeholder="Nama tamu">
+
+                <button
+                    class="btn"
+                    data-action="add-guest">
+
+                    + Tambah
+
+                </button>
+
+            </div>
+
+
+            <div
+                class="list"
+                id="guestList">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+   VENDOR
+========================================================= -->
+
+<section
+    class="page"
+    id="vendors">
+
+    <div class="container">
+
+        <h2 class="section-title">
+            Vendor Pernikahan
+        </h2>
+
+
+        <div class="card">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        Nama Vendor
+                    </label>
+
+                    <input
+                        id="vendorName"
+                        placeholder="Contoh: Dekorasi">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Kategori
+                    </label>
+
+                    <input
+                        id="vendorCategory"
+                        placeholder="Contoh: Dekorasi">
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    class="btn"
+                    data-action="add-vendor">
+
+                    + Tambah Vendor
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div
+                class="list"
+                id="vendorList">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+   RUNDOWN
+========================================================= -->
+
+<section
+    class="page"
+    id="rundown">
+
+    <div class="container">
+
+        <h2 class="section-title">
+            Rundown Pernikahan
+        </h2>
+
+
+        <div class="card">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+                        Waktu
+                    </label>
+
+                    <input
+                        type="time"
+                        id="runTime">
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Acara
+                    </label>
+
+                    <input
+                        id="runEvent"
+                        placeholder="Contoh: Akad Nikah">
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    class="btn"
+                    data-action="add-run">
+
+                    + Tambah Acara
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div
+                class="list"
+                id="runList">
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+   NAVIGATION
+========================================================= -->
+
+<nav class="bottom-nav">
+
+    <div class="nav-inner">
+
+        <button
+            class="nav-btn active"
+            data-action="navigate" data-page="dashboard">
+
+            <span>🏠</span>
+            Home
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-action="navigate" data-page="checklist">
+
+            <span>✅</span>
+            Checklist
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-action="navigate" data-page="budget">
+
+            <span>💰</span>
+            Budget
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-action="navigate" data-page="guests">
+
+            <span>👥</span>
+            Tamu
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-action="navigate" data-page="vendors">
+
+            <span>🏪</span>
+            Vendor
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-action="navigate" data-page="rundown">
+
+            <span>🕐</span>
+            Rundown
+
+        </button>
+
+
+        <button
+            class="nav-btn"
+            data-action="navigate" data-page="profile">
+
+            <span>💍</span>
+            Data
+
+        </button>
+
+    </div>
+
+</nav>
+
+
+<div
+    class="toast"
+    id="toast">
+</div>
+
+
+<script>
+
+/* =========================================================
+   SUPABASE CONFIG
+========================================================= */
+
+const SUPABASE_URL =
+    "https://swojrbucmpisgfawnjgf.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_j8hPr1KtzhKedRrGf-RuMA_ZJL2zv9C";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+/* =========================================================
+   GLOBAL DATA
+========================================================= */
+
+let currentUser = null;
+
+let budgets = [];
+
+let guests = [];
+
+let vendors = [];
+
+let runs = [];
+
+let profile = {};
+
+let checklist = [];
+
+let prewedPhotos = [];
+
+
+/* =========================================================
+   DEFAULT CHECKLIST
+========================================================= */
+
+const DEFAULT_CHECKLIST = [
+
+    {
+        title: "12–9 Bulan Sebelum",
+
+        tasks: [
+            "Menentukan konsep pernikahan",
+            "Menentukan tanggal",
+            "Menentukan perkiraan jumlah tamu",
+            "Menentukan budget awal",
+            "Mencari lokasi pernikahan"
+        ]
+    },
+
+    {
+        title: "8–6 Bulan Sebelum",
+
+        tasks: [
+            "Booking gedung",
+            "Booking catering",
+            "Memilih dekorasi",
+            "Memilih fotografer",
+            "Memilih videografer"
+        ]
+    },
+
+    {
+        title: "5–3 Bulan Sebelum",
+
+        tasks: [
+            "Memilih baju pengantin",
+            "Memilih undangan",
+            "Menentukan daftar tamu",
+            "Booking makeup artist",
+            "Menentukan souvenir"
+        ]
+    },
+
+    {
+        title: "2–1 Bulan Sebelum",
+
+        tasks: [
+            "Menyebarkan undangan",
+            "Finalisasi vendor",
+            "Finalisasi rundown",
+            "Persiapan dokumen",
+            "Konfirmasi jumlah tamu"
+        ]
+    },
+
+    {
+        title: "HARI-H",
+
+        tasks: [
+            "Persiapan makeup",
+            "Persiapan dekorasi",
+            "Akad / pemberkatan",
+            "Resepsi",
+            "Dokumentasi"
+        ]
+    }
+
+];
+
+
+/* =========================================================
+   UTILITY
+========================================================= */
+
+function formatRupiah(number) {
+
+    return new Intl.NumberFormat(
+        "id-ID",
+        {
+            style: "currency",
+            currency: "IDR",
+            maximumFractionDigits: 0
+        }
+    ).format(Number(number) || 0);
+
+}
+
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function showToast(message) {
+
+    const toast =
+        document.getElementById("toast");
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    clearTimeout(window.toastTimer);
+
+    window.toastTimer =
+        setTimeout(
+            () => {
+                toast.classList.remove("show");
+            },
+            2200
+        );
+
+}
+
+
+function setAuthMessage(
+    message,
+    success = false
+) {
+
+    const element =
+        document.getElementById(
+            "authMessage"
+        );
+
+    element.textContent = message;
+
+    element.className =
+        success
+            ? "auth-message success"
+            : "auth-message error";
+
+}
+
+
+function showLogin() {
+
+    document
+        .getElementById("loginForm")
+        .style.display = "block";
+
+    document
+        .getElementById("registerForm")
+        .style.display = "none";
+
+    setAuthMessage("");
+
+}
+
+
+function showRegister() {
+
+    document
+        .getElementById("loginForm")
+        .style.display = "none";
+
+    document
+        .getElementById("registerForm")
+        .style.display = "block";
+
+    setAuthMessage("");
+
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+async function registerUser() {
+
+    const email =
+        document
+            .getElementById("registerEmail")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("registerPassword")
+            .value;
+
+    const confirmPassword =
+        document
+            .getElementById(
+                "registerConfirmPassword"
+            )
+            .value;
+
+
+    if (!email || !password || !confirmPassword) {
+
+        setAuthMessage(
+            "Semua kolom harus diisi."
+        );
+
+        return;
+    }
+
+
+    if (password.length < 6) {
+
+        setAuthMessage(
+            "Password minimal 6 karakter."
+        );
+
+        return;
+    }
+
+
+    if (password !== confirmPassword) {
+
+        setAuthMessage(
+            "Konfirmasi password tidak sama."
+        );
+
+        return;
+    }
+
+
+    setAuthMessage(
+        "Membuat akun...",
+        true
+    );
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth.signUp({
+
+            email: email,
+
+            password: password
+
+        });
+
+
+    if (error) {
+
+        setAuthMessage(
+            error.message
+        );
+
+        return;
+    }
+
+
+    /*
+       Jika email confirmation aktif,
+       Supabase biasanya belum memberikan
+       session sampai email dikonfirmasi.
+    */
+
+    if (
+        data.user &&
+        !data.session
+    ) {
+
+        setAuthMessage(
+            "Akun berhasil dibuat. Silakan cek email untuk konfirmasi.",
+            true
+        );
+
+        return;
+    }
+
+
+    if (data.user) {
+
+        currentUser =
+            data.user;
+
+        await createProfileIfNeeded();
+
+        await initializeUserData();
+
+        enterApplication();
+
+    }
+
+}
+
+
+async function loginUser() {
+
+    const email =
+        document
+            .getElementById("loginEmail")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("loginPassword")
+            .value;
+
+
+    if (!email || !password) {
+
+        setAuthMessage(
+            "Email dan password harus diisi."
+        );
+
+        return;
+    }
+
+
+    setAuthMessage(
+        "Memeriksa akun...",
+        true
+    );
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth
+            .signInWithPassword({
+
+                email: email,
+
+                password: password
+
+            });
+
+
+    if (error) {
+
+        setAuthMessage(
+            "Login gagal: " +
+            error.message
+        );
+
+        return;
+    }
+
+
+    if (data.user) {
+
+        currentUser =
+            data.user;
+
+        await createProfileIfNeeded();
+
+        await initializeUserData();
+
+        enterApplication();
+
+    }
+
+}
+
+
+async function logoutUser() {
+
+    const {
+        error
+    } =
+        await supabaseClient.auth.signOut();
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal logout."
+        );
+
+        return;
+    }
+
+
+    location.reload();
+
+}
+
+
+/* =========================================================
+   PROFILE CREATION
+========================================================= */
+
+async function createProfileIfNeeded() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("profiles")
+            .select("id")
+            .eq(
+                "id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if (error) {
+
+/* =========================================================
+   PREWEDDING GALLERY - SUPABASE STORAGE
+========================================================= */
+
+async function loadPrewedPhotos() {
+
+    if (!currentUser) {
+        prewedPhotos = [];
+        return;
+    }
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("prewed_photos")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("created_at", {
+            ascending: false
+        });
+
+    if (error) {
+        console.error("Load prewed photos:", error);
+        prewedPhotos = [];
+        return;
+    }
+
+    const photos = data || [];
+
+    prewedPhotos = await Promise.all(
+        photos.map(async photo => {
+
+            const {
+                data: signedData,
+                error: signedError
+            } = await supabaseClient
+                .storage
+                .from("prewed-photos")
+                .createSignedUrl(
+                    photo.file_path,
+                    60 * 60
+                );
+
+            return {
+                ...photo,
+                signedUrl: signedError
+                    ? ""
+                    : signedData?.signedUrl || ""
+            };
+        })
+    );
+}
+
+
+function renderPrewedGallery() {
+
+    const gallery =
+        document.getElementById("prewedGallery");
+
+    const status =
+        document.getElementById("prewedGalleryStatus");
+
+    if (!gallery) {
+        return;
+    }
+
+    gallery.innerHTML = "";
+
+    if (!prewedPhotos.length) {
+
+        gallery.innerHTML = `
+            <div class="empty">
+                Belum ada foto prewed.
+            </div>
+        `;
+
+        if (status) {
+            status.textContent = "";
+        }
+
+        return;
+    }
+
+    prewedPhotos.forEach(photo => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "prewed-photo-card";
+        card.dataset.photoId = String(photo.id);
+
+        if (photo.signedUrl) {
+            card.innerHTML = `
+                <img
+                    src="${escapeHTML(photo.signedUrl)}"
+                    alt="Foto prewedding"
+                    draggable="false">
+
+                <button
+                    type="button"
+                    class="prewed-photo-delete"
+                    data-action="delete-prewed-photo"
+                    data-id="${photo.id}"
+                    aria-label="Hapus foto">
+                    ×
+                </button>
+            `;
+        } else {
+            card.innerHTML = `
+                <div class="empty">
+                    Foto tidak dapat dimuat.
+                </div>
+
+                <button
+                    type="button"
+                    class="prewed-photo-delete"
+                    data-action="delete-prewed-photo"
+                    data-id="${photo.id}"
+                    aria-label="Hapus foto">
+                    ×
+                </button>
+            `;
+        }
+
+        gallery.appendChild(card);
+    });
+
+    if (status) {
+        status.textContent =
+            prewedPhotos.length +
+            " foto tersimpan";
+    }
+
+    setupPrewedDrag();
+}
+
+
+async function uploadPrewedPhotos(fileList) {
+
+    if (!currentUser) {
+        showToast("Silakan login terlebih dahulu.");
+        return;
+    }
+
+    const files = Array.from(fileList || []);
+
+    if (!files.length) {
+        return;
+    }
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
+    const maxSize = 5 * 1024 * 1024;
+    const validFiles = [];
+
+    for (const file of files) {
+
+        if (!allowedTypes.includes(file.type)) {
+            showToast(
+                `${file.name}: format tidak didukung.`
+            );
+            continue;
+        }
+
+        if (file.size > maxSize) {
+            showToast(
+                `${file.name}: maksimal 5 MB.`
+            );
+            continue;
+        }
+
+        validFiles.push(file);
+    }
+
+    if (!validFiles.length) {
+        return;
+    }
+
+    const input =
+        document.getElementById("prewedPhotoInput");
+
+    const status =
+        document.getElementById("prewedGalleryStatus");
+
+    if (input) {
+        input.disabled = true;
+    }
+
+    if (status) {
+        status.textContent =
+            "Mengunggah " + validFiles.length + " foto...";
+    }
+
+    let uploadedCount = 0;
+
+    try {
+
+        for (const file of validFiles) {
+
+            const extension =
+                file.name.includes(".")
+                    ? file.name.split(".").pop().toLowerCase()
+                    : "jpg";
+
+            const safeExtension =
+                ["jpg", "jpeg", "png", "webp"].includes(extension)
+                    ? extension
+                    : "jpg";
+
+            const fileName =
+                `${crypto.randomUUID()}.${safeExtension}`;
+
+            const filePath =
+                `${currentUser.id}/${fileName}`;
+
+            const {
+                error: uploadError
+            } = await supabaseClient
+                .storage
+                .from("prewed-photos")
+                .upload(filePath, file, {
+                    contentType: file.type,
+                    upsert: false
+                });
+
+            if (uploadError) {
+                console.error("Upload prewed:", uploadError);
+                continue;
+            }
+
+            const {
+                error: insertError
+            } = await supabaseClient
+                .from("prewed_photos")
+                .insert({
+                    user_id: currentUser.id,
+                    file_path: filePath,
+                    file_name: file.name
+                });
+
+            if (insertError) {
+
+                console.error(
+                    "Save prewed metadata:",
+                    insertError
+                );
+
+                await supabaseClient
+                    .storage
+                    .from("prewed-photos")
+                    .remove([filePath]);
+
+                continue;
+            }
+
+            uploadedCount++;
+        }
+
+        await loadPrewedPhotos();
+        renderPrewedGallery();
+
+        if (uploadedCount === validFiles.length) {
+            showToast("Semua foto berhasil diunggah.");
+        } else if (uploadedCount > 0) {
+            showToast(
+                uploadedCount +
+                " foto berhasil diunggah."
+            );
+        } else {
+            showToast("Foto gagal diunggah.");
+        }
+
+    } finally {
+
+        if (input) {
+            input.disabled = false;
+            input.value = "";
+        }
+    }
+}
+
+
+async function deletePrewedPhoto(id) {
+
+    const photo =
+        prewedPhotos.find(
+            item => Number(item.id) === Number(id)
+        );
+
+    if (!photo || !currentUser) {
+        return;
+    }
+
+    if (!confirm("Hapus foto prewed ini?")) {
+        return;
+    }
+
+    const {
+        error: storageError
+    } = await supabaseClient
+        .storage
+        .from("prewed-photos")
+        .remove([photo.file_path]);
+
+    if (storageError) {
+        console.error(
+            "Delete storage photo:",
+            storageError
+        );
+        showToast("Gagal menghapus file foto.");
+        return;
+    }
+
+    const {
+        error: databaseError
+    } = await supabaseClient
+        .from("prewed_photos")
+        .delete()
+        .eq("id", photo.id)
+        .eq("user_id", currentUser.id);
+
+    if (databaseError) {
+        console.error(
+            "Delete photo metadata:",
+            databaseError
+        );
+        showToast(
+            "File terhapus, tetapi data foto belum sepenuhnya terhapus."
+        );
+        return;
+    }
+
+    prewedPhotos =
+        prewedPhotos.filter(
+            item => Number(item.id) !== Number(photo.id)
+        );
+
+    renderPrewedGallery();
+    showToast("Foto dihapus.");
+}
+
+
+function setupPrewedDrag() {
+
+    const gallery =
+        document.getElementById("prewedGallery");
+
+    if (!gallery || gallery.dataset.dragReady === "true") {
+        return;
+    }
+
+    gallery.dataset.dragReady = "true";
+
+    let isDown = false;
+    let startX = 0;
+    let scrollStart = 0;
+
+    gallery.addEventListener("pointerdown", event => {
+
+        if (event.target.closest("button")) {
+            return;
+        }
+
+        isDown = true;
+        startX = event.clientX;
+        scrollStart = gallery.scrollLeft;
+        gallery.classList.add("dragging");
+
+        try {
+            gallery.setPointerCapture(event.pointerId);
+        } catch (_) {}
+    });
+
+    gallery.addEventListener("pointermove", event => {
+
+        if (!isDown) {
+            return;
+        }
+
+        const distance =
+            event.clientX - startX;
+
+        gallery.scrollLeft =
+            scrollStart - distance;
+    });
+
+    const stopDrag = event => {
+
+        if (!isDown) {
+            return;
+        }
+
+        isDown = false;
+        gallery.classList.remove("dragging");
+
+        try {
+            gallery.releasePointerCapture(event.pointerId);
+        } catch (_) {}
+    };
+
+    gallery.addEventListener("pointerup", stopDrag);
+    gallery.addEventListener("pointercancel", stopDrag);
+    gallery.addEventListener("pointerleave", event => {
+        if (event.pointerType === "mouse") {
+            stopDrag(event);
+        }
+    });
+}
+
+
+
+
+        console.error(
+            "Profile check:",
+            error
+        );
+
+        return;
+    }
+
+
+    if (!data) {
+
+        const {
+            error: insertError
+        } =
+            await supabaseClient
+                .from("profiles")
+                .insert({
+
+                    id:
+                        currentUser.id
+
+                });
+
+
+        if (insertError) {
+
+            console.error(
+                "Profile insert:",
+                insertError
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   INITIALIZE USER DATA
+========================================================= */
+
+async function initializeUserData() {
+
+    await loadProfile();
+
+    await loadBudgets();
+
+    await loadGuests();
+
+    await loadVendors();
+
+    await loadRuns();
+
+    await loadChecklist();
+
+    await loadPrewedPhotos();
+
+    renderAll();
+
+}
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+async function loadProfile() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("profiles")
+            .select("*")
+            .eq(
+                "id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+    if (error) {
+
+        console.error(
+            "Load profile:",
+            error
+        );
+
+        return;
+    }
+
+
+    profile = data || {};
+
+    document
+        .getElementById("groomName")
+        .value =
+        profile.groom_name || "";
+
+
+    document
+        .getElementById("brideName")
+        .value =
+        profile.bride_name || "";
+
+
+    document
+        .getElementById("weddingDate")
+        .value =
+        profile.wedding_date || "";
+
+
+    document
+        .getElementById("weddingLocation")
+        .value =
+        profile.location || "";
+
+
+    document
+        .getElementById("coupleNameColor")
+        .value =
+        profile.name_color ||
+        "#ffffff";
+
+
+    updateColorPreview();
+
+    updateHero();
+
+}
+
+
+async function saveProfile() {
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    const updatedProfile = {
+
+        id:
+            currentUser.id,
+
+        groom_name:
+            document
+                .getElementById("groomName")
+                .value
+                .trim(),
+
+        bride_name:
+            document
+                .getElementById("brideName")
+                .value
+                .trim(),
+
+        wedding_date:
+            document
+                .getElementById("weddingDate")
+                .value || null,
+
+        location:
+            document
+                .getElementById("weddingLocation")
+                .value
+                .trim(),
+
+        name_color:
+            document
+                .getElementById("coupleNameColor")
+                .value ||
+            "#ffffff",
+
+        updated_at:
+            new Date().toISOString()
+
+    };
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("profiles")
+            .upsert(
+                updatedProfile,
+                {
+                    onConflict: "id"
+                }
+            )
+            .select()
+            .single();
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menyimpan data."
+        );
+
+        return;
+    }
+
+
+    profile = data;
+
+    updateHero();
+
+    showToast(
+        "Data pengantin berhasil disimpan ❤️"
+    );
+
+}
+
+
+function updateHero() {
+
+    const groom =
+        profile.groom_name ||
+        "Nama";
+
+    const bride =
+        profile.bride_name ||
+        "Pengantin";
+
+
+    const heroCouple =
+        document.getElementById(
+            "heroCouple"
+        );
+
+
+    heroCouple.textContent =
+        groom +
+        " & " +
+        bride;
+
+
+    heroCouple.style.color =
+        profile.name_color ||
+        "#ffffff";
+
+
+    const dateElement =
+        document.getElementById(
+            "heroDate"
+        );
+
+
+    if (profile.wedding_date) {
+
+        const date =
+            new Date(
+                profile.wedding_date +
+                "T00:00:00"
+            );
+
+
+        dateElement.textContent =
+            "📅 " +
+            date.toLocaleDateString(
+                "id-ID",
+                {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+
+    } else {
+
+        dateElement.textContent =
+            "📅 Tentukan tanggal pernikahan";
+
+    }
+
+
+    document
+        .getElementById(
+            "heroLocation"
+        )
+        .textContent =
+        profile.location
+            ? "📍 " +
+              profile.location
+            : "";
+
+
+    updateCountdown();
+
+}
+
+
+function updateColorPreview() {
+
+    const color =
+        document
+            .getElementById(
+                "coupleNameColor"
+            )
+            .value;
+
+
+    document
+        .getElementById(
+            "colorPreview"
+        )
+        .innerHTML = `
+
+            <span
+                class="color-preview-name"
+                style="color:${escapeHTML(color)}">
+
+                Nama & Nama
+
+            </span>
+
+        `;
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+function updateCountdown() {
+
+    const ids = [
+        "days",
+        "hours",
+        "minutes",
+        "seconds"
+    ];
+
+
+    if (!profile.wedding_date) {
+
+        ids.forEach(
+            id => {
+
+                document
+                    .getElementById(id)
+                    .textContent =
+                    "0";
+
+            }
+        );
+
+        return;
+    }
+
+
+    const target =
+        new Date(
+            profile.wedding_date +
+            "T00:00:00"
+        ).getTime();
+
+
+    let distance =
+        target -
+        Date.now();
+
+
+    if (distance < 0) {
+        distance = 0;
+    }
+
+
+    const days =
+        Math.floor(
+            distance /
+            86400000
+        );
+
+
+    const hours =
+        Math.floor(
+            distance /
+            3600000
+        ) % 24;
+
+
+    const minutes =
+        Math.floor(
+            distance /
+            60000
+        ) % 60;
+
+
+    const seconds =
+        Math.floor(
+            distance /
+            1000
+        ) % 60;
+
+
+    document
+        .getElementById("days")
+        .textContent =
+        days;
+
+
+    document
+        .getElementById("hours")
+        .textContent =
+        hours;
+
+
+    document
+        .getElementById("minutes")
+        .textContent =
+        minutes;
+
+
+    document
+        .getElementById("seconds")
+        .textContent =
+        seconds;
+
+}
+
+
+/* =========================================================
+   BUDGET - DATABASE
+========================================================= */
+
+async function loadBudgets() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("budgets")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "id",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Load budgets:",
+            error
+        );
+
+        budgets = [];
+
+        return;
+    }
+
+
+    budgets = data || [];
+
+}
+
+
+async function addBudget() {
+
+    const name =
+        document
+            .getElementById(
+                "budgetName"
+            )
+            .value
+            .trim();
+
+
+    const amount =
+        Number(
+            document
+                .getElementById(
+                    "budgetAmount"
+                )
+                .value
+        );
+
+
+    const spent =
+        Number(
+            document
+                .getElementById(
+                    "budgetSpent"
+                )
+                .value
+        );
+
+
+    if (!name) {
+
+        alert(
+            "Nama pengeluaran belum diisi."
+        );
+
+        return;
+    }
+
+
+    if (
+        Number.isNaN(amount) ||
+        Number.isNaN(spent) ||
+        amount < 0 ||
+        spent < 0
+    ) {
+
+        alert(
+            "Nominal budget tidak valid."
+        );
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("budgets")
+            .insert({
+
+                user_id:
+                    currentUser.id,
+
+                name:
+                    name,
+
+                budget:
+                    amount,
+
+                spent:
+                    spent
+
+            });
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menambahkan budget."
+        );
+
+        return;
+    }
+
+
+    document
+        .getElementById(
+            "budgetName"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "budgetAmount"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "budgetSpent"
+        )
+        .value = "";
+
+
+    await loadBudgets();
+
+    renderBudgets();
+
+    updateBudget();
+
+    showToast(
+        "Budget berhasil ditambahkan."
+    );
+
+}
+
+
+async function editBudget(id) {
+
+    const item =
+        budgets.find(
+            b => b.id === id
+        );
+
+
+    if (!item) {
+        return;
+    }
+
+
+    const name =
+        prompt(
+            "Nama pengeluaran:",
+            item.name
+        );
+
+
+    if (name === null) {
+        return;
+    }
+
+
+    const amount =
+        prompt(
+            "Anggaran:",
+            item.budget
+        );
+
+
+    if (amount === null) {
+        return;
+    }
+
+
+    const spent =
+        prompt(
+            "Sudah terpakai:",
+            item.spent
+        );
+
+
+    if (spent === null) {
+        return;
+    }
+
+
+    if (
+        !name.trim() ||
+        Number(amount) < 0 ||
+        Number(spent) < 0
+    ) {
+
+        alert(
+            "Data tidak valid."
+        );
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("budgets")
+            .update({
+
+                name:
+                    name.trim(),
+
+                budget:
+                    Number(amount),
+
+                spent:
+                    Number(spent)
+
+            })
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal memperbarui budget."
+        );
+
+        return;
+    }
+
+
+    await loadBudgets();
+
+    renderBudgets();
+
+    updateBudget();
+
+    showToast(
+        "Budget diperbarui."
+    );
+
+}
+
+
+async function deleteBudget(id) {
+
+    if (
+        !confirm(
+            "Hapus budget ini?"
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("budgets")
+            .delete()
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menghapus budget."
+        );
+
+        return;
+    }
+
+
+    await loadBudgets();
+
+    renderBudgets();
+
+    updateBudget();
+
+    showToast(
+        "Budget dihapus."
+    );
+
+}
+
+
+function renderBudgets() {
+
+    const list =
+        document.getElementById(
+            "budgetList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    if (!budgets.length) {
+
+        list.innerHTML =
+            '<div class="empty">Belum ada data budget.</div>';
+
+        return;
+    }
+
+
+    budgets.forEach(
+        item => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "list-item";
+
+
+            div.innerHTML = `
+
+                <div class="item-info">
+
+                    <strong>
+                        ${escapeHTML(item.name)}
+                    </strong>
+
+                    <small>
+
+                        Anggaran:
+                        ${formatRupiah(item.budget)}
+
+                        <br>
+
+                        Terpakai:
+                        ${formatRupiah(item.spent)}
+
+                    </small>
+
+                </div>
+
+
+                <div class="item-actions">
+
+                    <button
+                        class="small-btn edit"
+                        data-action="edit-budget" data-id="${item.id}">
+
+                        Edit
+
+                    </button>
+
+
+                    <button
+                        class="small-btn delete"
+                        data-action="delete-budget" data-id="${item.id}">
+
+                        Hapus
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            list.appendChild(div);
+
+        }
+    );
+
+}
+
+
+function updateBudget() {
+
+    let total = 0;
+
+    let used = 0;
+
+
+    budgets.forEach(
+        item => {
+
+            total +=
+                Number(item.budget) ||
+                0;
+
+            used +=
+                Number(item.spent) ||
+                0;
+
+        }
+    );
+
+
+    const remaining =
+        total - used;
+
+
+    document
+        .getElementById(
+            "totalBudget"
+        )
+        .textContent =
+        formatRupiah(total);
+
+
+    document
+        .getElementById(
+            "usedBudget"
+        )
+        .textContent =
+        formatRupiah(used);
+
+
+    document
+        .getElementById(
+            "remainingBudget"
+        )
+        .textContent =
+        formatRupiah(remaining);
+
+
+    document
+        .getElementById(
+            "budgetTotal2"
+        )
+        .textContent =
+        formatRupiah(total);
+
+
+    document
+        .getElementById(
+            "budgetUsed2"
+        )
+        .textContent =
+        formatRupiah(used);
+
+
+    document
+        .getElementById(
+            "budgetRemaining2"
+        )
+        .textContent =
+        formatRupiah(remaining);
+
+}
+
+
+/* =========================================================
+   CHECKLIST - DATABASE
+========================================================= */
+
+async function loadChecklist() {
+
+    const {
+        data: categories,
+        error
+    } =
+        await supabaseClient
+            .from("checklist_categories")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Load categories:",
+            error
+        );
+
+        checklist = [];
+
+        return;
+    }
+
+
+    /*
+       Jika pengguna baru,
+       buat checklist default.
+    */
+
+    if (
+        !categories ||
+        categories.length === 0
+    ) {
+
+        await createDefaultChecklist();
+
+        return;
+    }
+
+
+    const categoryIds =
+        categories.map(
+            c => c.id
+        );
+
+
+    const {
+        data: tasks,
+        error: taskError
+    } =
+        await supabaseClient
+            .from("checklist_tasks")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "sort_order",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (taskError) {
+
+        console.error(
+            "Load tasks:",
+            taskError
+        );
+
+        checklist = [];
+
+        return;
+    }
+
+
+    checklist =
+        categories.map(
+            category => ({
+
+                id:
+                    category.id,
+
+                title:
+                    category.name,
+
+                tasks:
+                    (tasks || [])
+                        .filter(
+                            task =>
+                                task.category_id ===
+                                category.id
+                        )
+                        .map(
+                            task => ({
+
+                                id:
+                                    task.id,
+
+                                text:
+                                    task.name,
+
+                                done:
+                                    task.completed
+
+                            })
+                        )
+
+            })
+        );
+
+}
+
+
+async function createDefaultChecklist() {
+
+    checklist = [];
+
+
+    for (
+        let categoryIndex = 0;
+        categoryIndex <
+        DEFAULT_CHECKLIST.length;
+        categoryIndex++
+    ) {
+
+        const categoryData =
+            DEFAULT_CHECKLIST[
+                categoryIndex
+            ];
+
+
+        const {
+            data: category,
+            error
+        } =
+            await supabaseClient
+                .from(
+                    "checklist_categories"
+                )
+                .insert({
+
+                    user_id:
+                        currentUser.id,
+
+                    name:
+                        categoryData.title,
+
+                    sort_order:
+                        categoryIndex
+
+                })
+                .select()
+                .single();
+
+
+        if (error) {
+
+            console.error(
+                "Create category:",
+                error
+            );
+
+            continue;
+        }
+
+
+        const taskRows =
+            categoryData.tasks.map(
+                (
+                    taskName,
+                    taskIndex
+                ) => ({
+
+                    category_id:
+                        category.id,
+
+                    user_id:
+                        currentUser.id,
+
+                    name:
+                        taskName,
+
+                    completed:
+                        false,
+
+                    sort_order:
+                        taskIndex
+
+                })
+            );
+
+
+        const {
+            data: tasks,
+            error: taskError
+        } =
+            await supabaseClient
+                .from(
+                    "checklist_tasks"
+                )
+                .insert(taskRows)
+                .select();
+
+
+        if (taskError) {
+
+            console.error(
+                "Create tasks:",
+                taskError
+            );
+
+            continue;
+        }
+
+
+        checklist.push({
+
+            id:
+                category.id,
+
+            title:
+                category.name,
+
+            tasks:
+                (tasks || []).map(
+                    task => ({
+
+                        id:
+                            task.id,
+
+                        text:
+                            task.name,
+
+                        done:
+                            task.completed
+
+                    })
+                )
+
+        });
+
+    }
+
+}
+
+
+async function addCategory() {
+
+    const input =
+        document.getElementById(
+            "newCategory"
+        );
+
+
+    const title =
+        input.value.trim();
+
+
+    if (!title) {
+
+        alert(
+            "Nama periode belum diisi."
+        );
+
+        return;
+    }
+
+
+    const sortOrder =
+        checklist.length;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "checklist_categories"
+            )
+            .insert({
+
+                user_id:
+                    currentUser.id,
+
+                name:
+                    title,
+
+                sort_order:
+                    sortOrder
+
+            });
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menambahkan periode."
+        );
+
+        return;
+    }
+
+
+    input.value = "";
+
+    await loadChecklist();
+
+    renderChecklist();
+
+    showToast(
+        "Periode ditambahkan."
+    );
+
+}
+
+
+async function editCategory(id) {
+
+    const category =
+        checklist.find(
+            c => c.id === id
+        );
+
+
+    if (!category) {
+        return;
+    }
+
+
+    const newTitle =
+        prompt(
+            "Ubah nama periode:",
+            category.title
+        );
+
+
+    if (
+        !newTitle ||
+        !newTitle.trim()
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "checklist_categories"
+            )
+            .update({
+
+                name:
+                    newTitle.trim()
+
+            })
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal memperbarui periode."
+        );
+
+        return;
+    }
+
+
+    await loadChecklist();
+
+    renderChecklist();
+
+    showToast(
+        "Periode diperbarui."
+    );
+
+}
+
+async function deleteCategory(id) {
+
+    if (
+        !confirm(
+            "Hapus periode dan seluruh tugas di dalamnya?"
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "checklist_categories"
+            )
+            .delete()
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menghapus periode."
+        );
+
+        return;
+    }
+
+
+    await loadChecklist();
+
+    renderChecklist();
+
+    showToast(
+        "Periode dihapus."
+    );
+
+}
+
+
+async function addChecklistTask(
+    categoryId
+) {
+
+    const category =
+        checklist.find(
+            c => c.id === categoryId
+        );
+
+
+    if (!category) {
+        return;
+    }
+
+
+    const task =
+        prompt(
+            "Masukkan tugas checklist:"
+        );
+
+
+    if (
+        !task ||
+        !task.trim()
+    ) {
+        return;
+    }
+
+
+    const sortOrder =
+        category.tasks.length;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "checklist_tasks"
+            )
+            .insert({
+
+                category_id:
+                    categoryId,
+
+                user_id:
+                    currentUser.id,
+
+                name:
+                    task.trim(),
+
+                completed:
+                    false,
+
+                sort_order:
+                    sortOrder
+
+            });
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menambahkan tugas."
+        );
+
+        return;
+    }
+
+
+    await loadChecklist();
+
+    renderChecklist();
+
+    showToast(
+        "Tugas ditambahkan."
+    );
+
+}
+
+
+async function editChecklistTask(
+    taskId
+) {
+
+    let oldTask = null;
+
+
+    for (const category of checklist) {
+
+        const found =
+            category.tasks.find(
+                t => t.id === taskId
+            );
+
+        if (found) {
+            oldTask = found;
+            break;
+        }
+
+    }
+
+
+    if (!oldTask) {
+        return;
+    }
+
+
+    const newTask =
+        prompt(
+            "Ubah tugas:",
+            oldTask.text
+        );
+
+
+    if (
+        !newTask ||
+        !newTask.trim()
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "checklist_tasks"
+            )
+            .update({
+
+                name:
+                    newTask.trim()
+
+            })
+            .eq(
+                "id",
+                taskId
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal memperbarui tugas."
+        );
+
+        return;
+    }
+
+
+    await loadChecklist();
+
+    renderChecklist();
+
+    showToast(
+        "Tugas diperbarui."
+    );
+
+}
+
+
+async function deleteChecklistTask(
+    taskId
+) {
+
+    if (
+        !confirm(
+            "Hapus tugas ini?"
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "checklist_tasks"
+            )
+            .delete()
+            .eq(
+                "id",
+                taskId
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menghapus tugas."
+        );
+
+        return;
+    }
+
+
+    await loadChecklist();
+
+    renderChecklist();
+
+    showToast(
+        "Tugas dihapus."
+    );
+
+}
+
+
+async function toggleChecklistTask(
+    taskId
+) {
+
+    let task = null;
+
+
+    for (const category of checklist) {
+
+        const found =
+            category.tasks.find(
+                t => t.id === taskId
+            );
+
+        if (found) {
+            task = found;
+            break;
+        }
+
+    }
+
+
+    if (!task) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from(
+                "checklist_tasks"
+            )
+            .update({
+
+                completed:
+                    !task.done
+
+            })
+            .eq(
+                "id",
+                taskId
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal memperbarui checklist."
+        );
+
+        return;
+    }
+
+
+    task.done =
+        !task.done;
+
+    updateChecklistProgress();
+
+}
+
+
+function renderChecklist() {
+
+    const container =
+        document.getElementById(
+            "checklistContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!checklist.length) {
+
+        container.innerHTML = `
+
+            <div class="card">
+
+                <div class="empty">
+
+                    Belum ada periode checklist.
+
+                </div>
+
+            </div>
+
+        `;
+
+        updateChecklistProgress();
+
+        return;
+    }
+
+
+    checklist.forEach(
+        category => {
+
+            const wrapper =
+                document.createElement(
+                    "div"
+                );
+
+
+            wrapper.className =
+                "card category";
+
+
+            let tasksHTML = "";
+
+
+            category.tasks.forEach(
+                task => {
+
+                    tasksHTML += `
+
+                        <div
+                            class="check-item
+                            ${task.done ? "done" : ""}">
+
+                            <input
+                                type="checkbox"
+                                ${task.done ? "checked" : ""}
+                                data-action="toggle-task" data-id="${task.id}">
+
+
+                            <span
+                                class="task-name">
+
+                                ${escapeHTML(task.text)}
+
+                            </span>
+
+
+                            <div class="item-actions">
+
+                                <button
+                                    class="small-btn edit"
+                                    data-action="edit-task" data-id="${task.id}">
+
+                                    Edit
+
+                                </button>
+
+
+                                <button
+                                    class="small-btn delete"
+                                    data-action="delete-task" data-id="${task.id}">
+
+                                    Hapus
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            );
+
+
+            wrapper.innerHTML = `
+
+                <div class="category-header">
+
+                    <strong>
+                        ${escapeHTML(
+                            category.title
+                        )}
+                    </strong>
+
+
+                    <div class="item-actions">
+
+                        <button
+                            class="small-btn edit"
+                            data-action="edit-category" data-id="${category.id}">
+
+                            Edit
+
+                        </button>
+
+
+                        <button
+                            class="small-btn delete"
+                            data-action="delete-category" data-id="${category.id}">
+
+                            Hapus
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                ${tasksHTML}
+
+
+                <button
+                    class="small-btn"
+                    data-action="add-task" data-id="${category.id}">
+
+                    + Tambah Tugas
+
+                </button>
+
+            `;
+
+
+            container.appendChild(
+                wrapper
+            );
+
+        }
+    );
+
+
+    updateChecklistProgress();
+
+}
+
+
+function updateChecklistProgress() {
+
+    let total = 0;
+
+    let completed = 0;
+
+
+    checklist.forEach(
+        category => {
+
+            category.tasks.forEach(
+                task => {
+
+                    total++;
+
+                    if (task.done) {
+                        completed++;
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    const percentage =
+        total
+            ? Math.round(
+                completed /
+                total *
+                100
+            )
+            : 0;
+
+
+    document
+        .getElementById(
+            "progressNumber"
+        )
+        .textContent =
+        percentage + "%";
+
+
+    document
+        .getElementById(
+            "progressPercent"
+        )
+        .textContent =
+        percentage + "%";
+
+
+    document
+        .getElementById(
+            "progressText"
+        )
+        .textContent =
+        completed +
+        " dari " +
+        total +
+        " tugas selesai";
+
+
+    document
+        .getElementById(
+            "checklistProgress"
+        )
+        .style.width =
+        percentage + "%";
+
+
+    const degree =
+        percentage * 3.6;
+
+
+    document
+        .getElementById(
+            "progressCircle"
+        )
+        .style.background =
+
+        `conic-gradient(
+            var(--accent) 0deg,
+            var(--accent) ${degree}deg,
+            #eee5e2 ${degree}deg,
+            #eee5e2 360deg
+        )`;
+
+}
+
+
+/* =========================================================
+   GUEST
+========================================================= */
+
+async function loadGuests() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("guests")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "id",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        guests = [];
+
+        return;
+    }
+
+
+    guests = data || [];
+
+}
+
+
+async function addGuest() {
+
+    const input =
+        document.getElementById(
+            "guestName"
+        );
+
+
+    const name =
+        input.value.trim();
+
+
+    if (!name) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("guests")
+            .insert({
+
+                user_id:
+                    currentUser.id,
+
+                name:
+                    name
+
+            });
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menambahkan tamu."
+        );
+
+        return;
+    }
+
+
+    input.value = "";
+
+    await loadGuests();
+
+    renderGuests();
+
+    showToast(
+        "Tamu ditambahkan."
+    );
+
+}
+
+
+async function editGuest(id) {
+
+    const guest =
+        guests.find(
+            g => g.id === id
+        );
+
+
+    if (!guest) {
+        return;
+    }
+
+
+    const name =
+        prompt(
+            "Ubah nama tamu:",
+            guest.name
+        );
+
+
+    if (
+        !name ||
+        !name.trim()
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("guests")
+            .update({
+
+                name:
+                    name.trim()
+
+            })
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal memperbarui tamu."
+        );
+
+        return;
+    }
+
+
+    await loadGuests();
+
+    renderGuests();
+
+    showToast(
+        "Nama tamu diperbarui."
+    );
+
+}
+
+
+async function deleteGuest(id) {
+
+    if (
+        !confirm(
+            "Hapus tamu ini?"
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("guests")
+            .delete()
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menghapus tamu."
+        );
+
+        return;
+    }
+
+
+    await loadGuests();
+
+    renderGuests();
+
+    showToast(
+        "Tamu dihapus."
+    );
+
+}
+
+
+function renderGuests() {
+
+    const list =
+        document.getElementById(
+            "guestList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    if (!guests.length) {
+
+        list.innerHTML =
+            '<div class="empty">Belum ada tamu.</div>';
+
+        return;
+    }
+
+
+    guests.forEach(
+        guest => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "list-item";
+
+
+            div.innerHTML = `
+
+                <div class="item-info">
+
+                    <strong>
+                        ${escapeHTML(guest.name)}
+                    </strong>
+
+                </div>
+
+
+                <div class="item-actions">
+
+                    <button
+                        class="small-btn edit"
+                        data-action="edit-guest" data-id="${guest.id}">
+
+                        Edit
+
+                    </button>
+
+
+                    <button
+                        class="small-btn delete"
+                        data-action="delete-guest" data-id="${guest.id}">
+
+                        Hapus
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            list.appendChild(div);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   VENDOR
+========================================================= */
+
+async function loadVendors() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("vendors")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "id",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        vendors = [];
+
+        return;
+    }
+
+
+    vendors = data || [];
+
+}
+
+
+async function addVendor() {
+
+    const name =
+        document
+            .getElementById(
+                "vendorName"
+            )
+            .value
+            .trim();
+
+
+    const category =
+        document
+            .getElementById(
+                "vendorCategory"
+            )
+            .value
+            .trim();
+
+
+    if (!name) {
+
+        alert(
+            "Nama vendor belum diisi."
+        );
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("vendors")
+            .insert({
+
+                user_id:
+                    currentUser.id,
+
+                name:
+                    name,
+
+                category:
+                    category
+
+            });
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menambahkan vendor."
+        );
+
+        return;
+    }
+
+
+    document
+        .getElementById(
+            "vendorName"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "vendorCategory"
+        )
+        .value = "";
+
+
+    await loadVendors();
+
+    renderVendors();
+
+    showToast(
+        "Vendor ditambahkan."
+    );
+
+}
+
+
+async function editVendor(id) {
+
+    const vendor =
+        vendors.find(
+            v => v.id === id
+        );
+
+
+    if (!vendor) {
+        return;
+    }
+
+
+    const name =
+        prompt(
+            "Nama vendor:",
+            vendor.name
+        );
+
+
+    if (name === null) {
+        return;
+    }
+
+
+    const category =
+        prompt(
+            "Kategori:",
+            vendor.category || ""
+        );
+
+
+    if (category === null) {
+        return;
+    }
+
+
+    if (!name.trim()) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("vendors")
+            .update({
+
+                name:
+                    name.trim(),
+
+                category:
+                    category.trim()
+
+            })
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal memperbarui vendor."
+        );
+
+        return;
+    }
+
+
+    await loadVendors();
+
+    renderVendors();
+
+    showToast(
+        "Vendor diperbarui."
+    );
+
+}
+
+
+async function deleteVendor(id) {
+
+    if (
+        !confirm(
+            "Hapus vendor ini?"
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("vendors")
+            .delete()
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menghapus vendor."
+        );
+
+        return;
+    }
+
+
+    await loadVendors();
+
+    renderVendors();
+
+    showToast(
+        "Vendor dihapus."
+    );
+
+}
+
+
+function renderVendors() {
+
+    const list =
+        document.getElementById(
+            "vendorList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    if (!vendors.length) {
+
+        list.innerHTML =
+            '<div class="empty">Belum ada vendor.</div>';
+
+        return;
+    }
+
+
+    vendors.forEach(
+        vendor => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "list-item";
+
+
+            div.innerHTML = `
+
+                <div class="item-info">
+
+                    <strong>
+                        ${escapeHTML(
+                            vendor.name
+                        )}
+                    </strong>
+
+
+                    <small>
+
+                        ${escapeHTML(
+                            vendor.category ||
+                            "Tanpa kategori"
+                        )}
+
+                    </small>
+
+                </div>
+
+
+                <div class="item-actions">
+
+                    <button
+                        class="small-btn edit"
+                        data-action="edit-vendor" data-id="${vendor.id}">
+
+                        Edit
+
+                    </button>
+
+
+                    <button
+                        class="small-btn delete"
+                        data-action="delete-vendor" data-id="${vendor.id}">
+
+                        Hapus
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            list.appendChild(div);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RUNDOWN
+========================================================= */
+
+async function loadRuns() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("rundowns")
+            .select("*")
+            .eq(
+                "user_id",
+                currentUser.id
+            )
+            .order(
+                "event_time",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        runs = [];
+
+        return;
+    }
+
+
+    runs = data || [];
+
+}
+
+
+async function addRun() {
+
+    const time =
+        document
+            .getElementById(
+                "runTime"
+            )
+            .value;
+
+
+    const event =
+        document
+            .getElementById(
+                "runEvent"
+            )
+            .value
+            .trim();
+
+
+    if (!time || !event) {
+
+        alert(
+            "Waktu dan acara harus diisi."
+        );
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("rundowns")
+            .insert({
+
+                user_id:
+                    currentUser.id,
+
+                event_time:
+                    time,
+
+                event:
+                    event
+
+            });
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menambahkan rundown."
+        );
+
+        return;
+    }
+
+
+    document
+        .getElementById(
+            "runTime"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "runEvent"
+        )
+        .value = "";
+
+
+    await loadRuns();
+
+    renderRuns();
+
+    showToast(
+        "Acara rundown ditambahkan."
+    );
+
+}
+
+
+async function editRun(id) {
+
+    const run =
+        runs.find(
+            r => r.id === id
+        );
+
+
+    if (!run) {
+        return;
+    }
+
+
+    const time =
+        prompt(
+            "Waktu:",
+            String(
+                run.event_time
+            ).slice(0,5)
+        );
+
+
+    if (time === null) {
+        return;
+    }
+
+
+    const event =
+        prompt(
+            "Acara:",
+            run.event
+        );
+
+
+    if (event === null) {
+        return;
+    }
+
+
+    if (
+        !time ||
+        !event.trim()
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("rundowns")
+            .update({
+
+                event_time:
+                    time,
+
+                event:
+                    event.trim()
+
+            })
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal memperbarui rundown."
+        );
+
+        return;
+    }
+
+
+    await loadRuns();
+
+    renderRuns();
+
+    showToast(
+        "Rundown diperbarui."
+    );
+
+}
+
+
+async function deleteRun(id) {
+
+    if (
+        !confirm(
+            "Hapus acara ini?"
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("rundowns")
+            .delete()
+            .eq(
+                "id",
+                id
+            )
+            .eq(
+                "user_id",
+                currentUser.id
+            );
+
+
+    if (error) {
+
+        console.error(error);
+
+        showToast(
+            "Gagal menghapus rundown."
+        );
+
+        return;
+    }
+
+
+    await loadRuns();
+
+    renderRuns();
+
+    showToast(
+        "Acara dihapus."
+    );
+
+}
+
+
+function renderRuns() {
+
+    const list =
+        document.getElementById(
+            "runList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    if (!runs.length) {
+
+        list.innerHTML =
+            '<div class="empty">Belum ada rundown.</div>';
+
+        return;
+    }
+
+
+    runs.forEach(
+        run => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "list-item";
+
+
+            const displayTime =
+                String(
+                    run.event_time
+                ).slice(0,5);
+
+
+            div.innerHTML = `
+
+                <div class="item-info">
+
+                    <strong>
+
+                        ${escapeHTML(
+                            displayTime
+                        )}
+
+                    </strong>
+
+
+                    <small>
+
+                        ${escapeHTML(
+                            run.event
+                        )}
+
+                    </small>
+
+                </div>
+
+
+                <div class="item-actions">
+
+                    <button
+                        class="small-btn edit"
+                        data-action="edit-run" data-id="${run.id}">
+
+                        Edit
+
+                    </button>
+
+
+                    <button
+                        class="small-btn delete"
+                        data-action="delete-run" data-id="${run.id}">
+
+                        Hapus
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            list.appendChild(div);
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function showPage(
+    pageId,
+    button
+) {
+
+    document
+        .querySelectorAll(".page")
+        .forEach(
+            page => {
+
+                page.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+    const target =
+        document.getElementById(
+            pageId
+        );
+
+
+    if (target) {
+
+        target.classList.add(
+            "active"
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(".nav-btn")
+        .forEach(
+            btn => {
+
+                btn.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+    if (button) {
+
+        button.classList.add(
+            "active"
+        );
+
+    }
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================================================
+   RENDER ALL
+========================================================= */
+
+function renderAll() {
+
+    renderBudgets();
+
+    updateBudget();
+
+    renderChecklist();
+
+    renderGuests();
+
+    renderVendors();
+
+    renderRuns();
+
+    updateHero();
+
+    updateChecklistProgress();
+
+    renderPrewedGallery();
+
+}
+
+
+/* =========================================================
+   ENTER APPLICATION
+========================================================= */
+
+function enterApplication() {
+
+    document
+        .getElementById(
+            "loadingScreen"
+        )
+        .style.display =
+        "none";
+
+
+    document
+        .getElementById(
+            "authPage"
+        )
+        .style.display =
+        "none";
+
+
+    document
+        .getElementById(
+            "userBar"
+        )
+        .style.display =
+        "block";
+
+
+    document
+        .getElementById(
+            "currentUserEmail"
+        )
+        .textContent =
+        currentUser?.email ||
+        "";
+
+}
+
+
+/* =========================================================
+   CHECK SESSION
+========================================================= */
+
+async function checkSession() {
+
+    const loadingScreen =
+        document.getElementById(
+            "loadingScreen"
+        );
+
+    const authPage =
+        document.getElementById(
+            "authPage"
+        );
+
+
+    try {
+
+        // Cek session Supabase
+        const sessionRequest =
+            supabaseClient.auth.getSession();
+
+
+        // Timeout 10 detik
+        const timeout =
+            new Promise((resolve) => {
+
+                setTimeout(() => {
+
+                    resolve({
+                        data: {
+                            session: null
+                        },
+                        error: new Error(
+                            "Session check timeout"
+                        )
+                    });
+
+                }, 10000);
+
+            });
+
+
+        const {
+            data,
+            error
+        } =
+            await Promise.race([
+                sessionRequest,
+                timeout
+            ]);
+
+
+        if (error) {
+
+            console.error(
+                "Session:",
+                error
+            );
+
+        }
+
+
+        // ==========================================
+        // ADA SESSION
+        // ==========================================
+
+        if (
+            data &&
+            data.session &&
+            data.session.user
+        ) {
+
+            currentUser =
+                data.session.user;
+
+
+            // Langsung masuk aplikasi
+            enterApplication();
+
+
+            // Muat data setelah aplikasi tampil
+            try {
+
+                await createProfileIfNeeded();
+
+                await initializeUserData();
+
+            } catch (error) {
+
+                console.error(
+                    "Gagal memuat data pengguna:",
+                    error
+                );
+
+                showToast(
+                    "Sebagian data belum dapat dimuat."
+                );
+
+            }
+
+
+            return;
+        }
+
+
+        // ==========================================
+        // TIDAK ADA SESSION
+        // ==========================================
+
+        if (authPage) {
+
+            authPage.style.display =
+                "flex";
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Gagal memeriksa session:",
+            error
+        );
+
+
+        // Jika pengecekan session gagal,
+        // tetap tampilkan halaman login
+        if (authPage) {
+
+            authPage.style.display =
+                "flex";
+
+        }
+
+
+    } finally {
+
+        // Loading selalu dihentikan
+        if (loadingScreen) {
+
+            loadingScreen.style.display =
+                "none";
+
+        }
+
+    }
+
+}
+
+supabaseClient.auth.onAuthStateChange(
+    async (
+        event,
+        session
+    ) => {
+
+        if (
+            event ===
+            "SIGNED_IN" &&
+            session
+        ) {
+
+            currentUser =
+                session.user;
+
+        }
+
+
+        if (
+            event ===
+            "SIGNED_OUT"
+        ) {
+
+            currentUser = null;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   COLOR PICKER
+========================================================= */
+
+document
+    .getElementById(
+        "coupleNameColor"
+    )
+    .addEventListener(
+        "input",
+        function() {
+
+            document
+                .getElementById(
+                    "heroCouple"
+                )
+                .style.color =
+                this.value;
+
+
+            updateColorPreview();
+
+        }
+    );
+
+
+/* =========================================================
+   ENTER KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key !==
+            "Enter"
+        ) {
+            return;
+        }
+
+
+        const activePage =
+            document.querySelector(
+                ".page.active"
+            );
+
+
+        if (!activePage) {
+            return;
+        }
+
+
+        if (
+            activePage.id ===
+            "guests"
+        ) {
+
+            addGuest();
+
+        }
+
+
+        else if (
+            activePage.id ===
+            "checklist" &&
+            document.activeElement.id ===
+            "newCategory"
+        ) {
+
+            addCategory();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   PREWEDDING EVENTS
+========================================================= */
+
+document.addEventListener("change", function(event) {
+
+    if (event.target.id !== "prewedPhotoInput") {
+        return;
+    }
+
+    uploadPrewedPhotos(event.target.files);
+});
+
+
+/* =========================================================
+   EVENT HANDLERS - NO INLINE EVENTS
+========================================================= */
+
+document.addEventListener("click", async function(event) {
+
+    const target = event.target.closest("[data-action]");
+
+    if (!target) {
+        return;
+    }
+
+    const action = target.dataset.action;
+    const id = target.dataset.id ? Number(target.dataset.id) : null;
+
+    try {
+        switch (action) {
+            case "login":
+                await loginUser();
+                break;
+            case "show-register":
+                showRegister();
+                break;
+            case "register":
+                await registerUser();
+                break;
+            case "show-login":
+                showLogin();
+                break;
+            case "logout":
+                await logoutUser();
+                break;
+            case "save-profile":
+                await saveProfile();
+                break;
+            case "add-budget":
+                await addBudget();
+                break;
+            case "add-category":
+                await addCategory();
+                break;
+            case "add-guest":
+                await addGuest();
+                break;
+            case "add-vendor":
+                await addVendor();
+                break;
+            case "add-run":
+                await addRun();
+                break;
+            case "navigate":
+                showPage(target.dataset.page, target);
+                break;
+            case "edit-budget":
+                await editBudget(id);
+                break;
+            case "delete-budget":
+                await deleteBudget(id);
+                break;
+            case "edit-guest":
+                await editGuest(id);
+                break;
+            case "delete-guest":
+                await deleteGuest(id);
+                break;
+            case "edit-vendor":
+                await editVendor(id);
+                break;
+            case "delete-vendor":
+                await deleteVendor(id);
+                break;
+            case "edit-run":
+                await editRun(id);
+                break;
+            case "delete-run":
+                await deleteRun(id);
+                break;
+            case "edit-task":
+                await editChecklistTask(id);
+                break;
+            case "delete-task":
+                await deleteChecklistTask(id);
+                break;
+            case "edit-category":
+                await editCategory(id);
+                break;
+            case "delete-category":
+                await deleteCategory(id);
+                break;
+            case "add-task":
+                await addChecklistTask(id);
+                break;
+            case "delete-prewed-photo":
+                await deletePrewedPhoto(id);
+                break;
+        }
+    } catch (error) {
+        console.error("Event handler error:", error);
+        showToast("Terjadi kesalahan. Silakan coba lagi.");
+    }
+
+});
+
+document.addEventListener("change", async function(event) {
+
+    const target = event.target.closest('[data-action="toggle-task"]');
+
+    if (!target) {
+        return;
+    }
+
+    const id = Number(target.dataset.id);
+
+    try {
+        await toggleChecklistTask(id);
+        renderChecklist();
+    } catch (error) {
+        console.error("Checklist event error:", error);
+        showToast("Gagal memperbarui checklist.");
+    }
+
+});
+
+
+/* =========================================================
+   START
+========================================================= */
+
+checkSession();
+
+
+setInterval(
+    updateCountdown,
+    1000
+);
+
+</script>
+
+</body>
+</html>
