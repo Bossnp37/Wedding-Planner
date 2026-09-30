@@ -884,150 +884,6 @@ input[type="color"] {
 
 
 /* =========================================================
-   PREWEDDING GALLERY
-========================================================= */
-
-.prewed-gallery-card {
-    overflow: hidden;
-}
-
-.prewed-gallery-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.prewed-gallery-header h3 {
-    font-family: "Playfair Display", serif;
-    font-size: 21px;
-    margin-bottom: 4px;
-}
-
-.prewed-gallery-header p {
-    color: var(--muted);
-    font-size: 13px;
-}
-
-.prewed-upload-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: var(--primary);
-    color: var(--white);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: .2s;
-}
-
-.prewed-upload-btn:hover {
-    background: var(--primary-dark);
-}
-
-.prewed-upload-btn input {
-    display: none;
-}
-
-.prewed-gallery-wrap {
-    position: relative;
-}
-
-.prewed-gallery {
-    display: flex;
-    gap: 14px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 4px 2px 12px;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    cursor: grab;
-}
-
-.prewed-gallery.dragging {
-    cursor: grabbing;
-    scroll-behavior: auto;
-    scroll-snap-type: none;
-}
-
-.prewed-gallery::-webkit-scrollbar {
-    height: 8px;
-}
-
-.prewed-gallery::-webkit-scrollbar-thumb {
-    background: #d8c7c3;
-    border-radius: 20px;
-}
-
-.prewed-photo-card {
-    flex: 0 0 250px;
-    height: 315px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 18px;
-    background: #eee5e2;
-    scroll-snap-align: start;
-    box-shadow: 0 8px 22px rgba(61,48,48,.10);
-}
-
-.prewed-photo-card img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-.prewed-photo-delete {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 36px;
-    height: 36px;
-    border: 0;
-    border-radius: 50%;
-    background: rgba(61,48,48,.78);
-    color: white;
-    font-size: 17px;
-    display: grid;
-    place-items: center;
-    z-index: 2;
-}
-
-.prewed-photo-delete:hover {
-    background: var(--danger);
-}
-
-.prewed-gallery-status {
-    margin-top: 8px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-@media (max-width: 600px) {
-    .prewed-gallery-header {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .prewed-upload-btn {
-        width: 100%;
-    }
-
-    .prewed-photo-card {
-        flex-basis: 82vw;
-        height: 330px;
-    }
-}
-
-
-/* =========================================================
    NAVIGATION
 ========================================================= */
 
@@ -1283,7 +1139,7 @@ input[type="color"] {
     </div>
 
     <div class="loading-text">
-        Memuat Wedding Planner...
+        Memeriksa akun...
     </div>
 
 </div>
@@ -1722,46 +1578,6 @@ input[type="color"] {
 
         </div>
 
-        <div class="card prewed-gallery-card">
-
-            <div class="prewed-gallery-header">
-
-                <div>
-                    <h3>📸 Galeri Prewed</h3>
-                    <p>Upload dan geser foto momen spesial kalian.</p>
-                </div>
-
-                <label class="prewed-upload-btn">
-                    + Upload Foto
-                    <input
-                        type="file"
-                        id="prewedPhotoInput"
-                        accept="image/jpeg,image/png,image/webp"
-                        multiple>
-                </label>
-
-            </div>
-
-            <div class="prewed-gallery-wrap">
-
-                <div
-                    class="prewed-gallery"
-                    id="prewedGallery">
-
-                    <div class="empty">
-                        Belum ada foto prewed.
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div
-                class="prewed-gallery-status"
-                id="prewedGalleryStatus">
-            </div>
-
-        </div>
 
     </div>
 
@@ -2390,7 +2206,6 @@ let profile = {};
 
 let checklist = [];
 
-let prewedPhotos = [];
 
 
 /* =========================================================
@@ -2673,11 +2488,15 @@ async function registerUser() {
         currentUser =
             data.user;
 
-        await createProfileIfNeeded();
-
-        await initializeUserData();
-
         enterApplication();
+
+        try {
+            await withTimeout(createProfileIfNeeded(), 10000, "Pembuatan profil");
+        } catch (error) {
+            console.error("Profile init:", error);
+        }
+
+        await initializeUserDataSafe();
 
     }
 
@@ -2744,11 +2563,15 @@ async function loginUser() {
         currentUser =
             data.user;
 
-        await createProfileIfNeeded();
-
-        await initializeUserData();
-
         enterApplication();
+
+        try {
+            await withTimeout(createProfileIfNeeded(), 10000, "Pembuatan profil");
+        } catch (error) {
+            console.error("Profile init:", error);
+        }
+
+        await initializeUserDataSafe();
 
     }
 
@@ -2807,423 +2630,6 @@ async function createProfileIfNeeded() {
 
     if (error) {
 
-/* =========================================================
-   PREWEDDING GALLERY - SUPABASE STORAGE
-========================================================= */
-
-async function loadPrewedPhotos() {
-
-    if (!currentUser) {
-        prewedPhotos = [];
-        return;
-    }
-
-    const {
-        data,
-        error
-    } = await supabaseClient
-        .from("prewed_photos")
-        .select("*")
-        .eq("user_id", currentUser.id)
-        .order("created_at", {
-            ascending: false
-        });
-
-    if (error) {
-        console.error("Load prewed photos:", error);
-        prewedPhotos = [];
-        return;
-    }
-
-    const photos = data || [];
-
-    prewedPhotos = await Promise.all(
-        photos.map(async photo => {
-
-            const {
-                data: signedData,
-                error: signedError
-            } = await supabaseClient
-                .storage
-                .from("prewed-photos")
-                .createSignedUrl(
-                    photo.file_path,
-                    60 * 60
-                );
-
-            return {
-                ...photo,
-                signedUrl: signedError
-                    ? ""
-                    : signedData?.signedUrl || ""
-            };
-        })
-    );
-}
-
-
-function renderPrewedGallery() {
-
-    const gallery =
-        document.getElementById("prewedGallery");
-
-    const status =
-        document.getElementById("prewedGalleryStatus");
-
-    if (!gallery) {
-        return;
-    }
-
-    gallery.innerHTML = "";
-
-    if (!prewedPhotos.length) {
-
-        gallery.innerHTML = `
-            <div class="empty">
-                Belum ada foto prewed.
-            </div>
-        `;
-
-        if (status) {
-            status.textContent = "";
-        }
-
-        return;
-    }
-
-    prewedPhotos.forEach(photo => {
-
-        const card =
-            document.createElement("div");
-
-        card.className = "prewed-photo-card";
-        card.dataset.photoId = String(photo.id);
-
-        if (photo.signedUrl) {
-            card.innerHTML = `
-                <img
-                    src="${escapeHTML(photo.signedUrl)}"
-                    alt="Foto prewedding"
-                    draggable="false">
-
-                <button
-                    type="button"
-                    class="prewed-photo-delete"
-                    data-action="delete-prewed-photo"
-                    data-id="${photo.id}"
-                    aria-label="Hapus foto">
-                    ×
-                </button>
-            `;
-        } else {
-            card.innerHTML = `
-                <div class="empty">
-                    Foto tidak dapat dimuat.
-                </div>
-
-                <button
-                    type="button"
-                    class="prewed-photo-delete"
-                    data-action="delete-prewed-photo"
-                    data-id="${photo.id}"
-                    aria-label="Hapus foto">
-                    ×
-                </button>
-            `;
-        }
-
-        gallery.appendChild(card);
-    });
-
-    if (status) {
-        status.textContent =
-            prewedPhotos.length +
-            " foto tersimpan";
-    }
-
-    setupPrewedDrag();
-}
-
-
-async function uploadPrewedPhotos(fileList) {
-
-    if (!currentUser) {
-        showToast("Silakan login terlebih dahulu.");
-        return;
-    }
-
-    const files = Array.from(fileList || []);
-
-    if (!files.length) {
-        return;
-    }
-
-    const allowedTypes = [
-        "image/jpeg",
-        "image/png",
-        "image/webp"
-    ];
-
-    const maxSize = 5 * 1024 * 1024;
-    const validFiles = [];
-
-    for (const file of files) {
-
-        if (!allowedTypes.includes(file.type)) {
-            showToast(
-                `${file.name}: format tidak didukung.`
-            );
-            continue;
-        }
-
-        if (file.size > maxSize) {
-            showToast(
-                `${file.name}: maksimal 5 MB.`
-            );
-            continue;
-        }
-
-        validFiles.push(file);
-    }
-
-    if (!validFiles.length) {
-        return;
-    }
-
-    const input =
-        document.getElementById("prewedPhotoInput");
-
-    const status =
-        document.getElementById("prewedGalleryStatus");
-
-    if (input) {
-        input.disabled = true;
-    }
-
-    if (status) {
-        status.textContent =
-            "Mengunggah " + validFiles.length + " foto...";
-    }
-
-    let uploadedCount = 0;
-
-    try {
-
-        for (const file of validFiles) {
-
-            const extension =
-                file.name.includes(".")
-                    ? file.name.split(".").pop().toLowerCase()
-                    : "jpg";
-
-            const safeExtension =
-                ["jpg", "jpeg", "png", "webp"].includes(extension)
-                    ? extension
-                    : "jpg";
-
-            const fileName =
-                `${crypto.randomUUID()}.${safeExtension}`;
-
-            const filePath =
-                `${currentUser.id}/${fileName}`;
-
-            const {
-                error: uploadError
-            } = await supabaseClient
-                .storage
-                .from("prewed-photos")
-                .upload(filePath, file, {
-                    contentType: file.type,
-                    upsert: false
-                });
-
-            if (uploadError) {
-                console.error("Upload prewed:", uploadError);
-                continue;
-            }
-
-            const {
-                error: insertError
-            } = await supabaseClient
-                .from("prewed_photos")
-                .insert({
-                    user_id: currentUser.id,
-                    file_path: filePath,
-                    file_name: file.name
-                });
-
-            if (insertError) {
-
-                console.error(
-                    "Save prewed metadata:",
-                    insertError
-                );
-
-                await supabaseClient
-                    .storage
-                    .from("prewed-photos")
-                    .remove([filePath]);
-
-                continue;
-            }
-
-            uploadedCount++;
-        }
-
-        await loadPrewedPhotos();
-        renderPrewedGallery();
-
-        if (uploadedCount === validFiles.length) {
-            showToast("Semua foto berhasil diunggah.");
-        } else if (uploadedCount > 0) {
-            showToast(
-                uploadedCount +
-                " foto berhasil diunggah."
-            );
-        } else {
-            showToast("Foto gagal diunggah.");
-        }
-
-    } finally {
-
-        if (input) {
-            input.disabled = false;
-            input.value = "";
-        }
-    }
-}
-
-
-async function deletePrewedPhoto(id) {
-
-    const photo =
-        prewedPhotos.find(
-            item => Number(item.id) === Number(id)
-        );
-
-    if (!photo || !currentUser) {
-        return;
-    }
-
-    if (!confirm("Hapus foto prewed ini?")) {
-        return;
-    }
-
-    const {
-        error: storageError
-    } = await supabaseClient
-        .storage
-        .from("prewed-photos")
-        .remove([photo.file_path]);
-
-    if (storageError) {
-        console.error(
-            "Delete storage photo:",
-            storageError
-        );
-        showToast("Gagal menghapus file foto.");
-        return;
-    }
-
-    const {
-        error: databaseError
-    } = await supabaseClient
-        .from("prewed_photos")
-        .delete()
-        .eq("id", photo.id)
-        .eq("user_id", currentUser.id);
-
-    if (databaseError) {
-        console.error(
-            "Delete photo metadata:",
-            databaseError
-        );
-        showToast(
-            "File terhapus, tetapi data foto belum sepenuhnya terhapus."
-        );
-        return;
-    }
-
-    prewedPhotos =
-        prewedPhotos.filter(
-            item => Number(item.id) !== Number(photo.id)
-        );
-
-    renderPrewedGallery();
-    showToast("Foto dihapus.");
-}
-
-
-function setupPrewedDrag() {
-
-    const gallery =
-        document.getElementById("prewedGallery");
-
-    if (!gallery || gallery.dataset.dragReady === "true") {
-        return;
-    }
-
-    gallery.dataset.dragReady = "true";
-
-    let isDown = false;
-    let startX = 0;
-    let scrollStart = 0;
-
-    gallery.addEventListener("pointerdown", event => {
-
-        if (event.target.closest("button")) {
-            return;
-        }
-
-        isDown = true;
-        startX = event.clientX;
-        scrollStart = gallery.scrollLeft;
-        gallery.classList.add("dragging");
-
-        try {
-            gallery.setPointerCapture(event.pointerId);
-        } catch (_) {}
-    });
-
-    gallery.addEventListener("pointermove", event => {
-
-        if (!isDown) {
-            return;
-        }
-
-        const distance =
-            event.clientX - startX;
-
-        gallery.scrollLeft =
-            scrollStart - distance;
-    });
-
-    const stopDrag = event => {
-
-        if (!isDown) {
-            return;
-        }
-
-        isDown = false;
-        gallery.classList.remove("dragging");
-
-        try {
-            gallery.releasePointerCapture(event.pointerId);
-        } catch (_) {}
-    };
-
-    gallery.addEventListener("pointerup", stopDrag);
-    gallery.addEventListener("pointercancel", stopDrag);
-    gallery.addEventListener("pointerleave", event => {
-        if (event.pointerType === "mouse") {
-            stopDrag(event);
-        }
-    });
-}
-
-
-
-
         console.error(
             "Profile check:",
             error
@@ -3280,7 +2686,6 @@ async function initializeUserData() {
 
     await loadChecklist();
 
-    await loadPrewedPhotos();
 
     renderAll();
 
@@ -6267,7 +5672,6 @@ function renderAll() {
 
     updateChecklistProgress();
 
-    renderPrewedGallery();
 
 }
 
@@ -6314,154 +5718,124 @@ function enterApplication() {
 
 
 /* =========================================================
+   AUTH / DATA LOADING SAFETY
+========================================================= */
+
+function withTimeout(promise, ms, label = "Operasi") {
+
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => {
+            setTimeout(() => {
+                reject(new Error(label + " timeout."));
+            }, ms);
+        })
+    ]);
+}
+
+
+async function initializeUserDataSafe() {
+
+    // Satu kegagalan data tidak boleh membuat aplikasi menggantung.
+    const jobs = [
+        ["profile", loadProfile],
+        ["budget", loadBudgets],
+        ["tamu", loadGuests],
+        ["vendor", loadVendors],
+        ["rundown", loadRuns],
+        ["checklist", loadChecklist]
+    ];
+
+    await Promise.all(
+        jobs.map(async ([name, fn]) => {
+            try {
+                await withTimeout(fn(), 10000, "Memuat " + name);
+            } catch (error) {
+                console.error("Gagal memuat " + name + ":", error);
+            }
+        })
+    );
+
+    renderAll();
+}
+
+
+/* =========================================================
    CHECK SESSION
 ========================================================= */
 
 async function checkSession() {
 
     const loadingScreen =
-        document.getElementById(
-            "loadingScreen"
-        );
+        document.getElementById("loadingScreen");
 
     const authPage =
-        document.getElementById(
-            "authPage"
-        );
+        document.getElementById("authPage");
 
+    const loadingText =
+        document.querySelector(".loading-text");
 
     try {
 
-        // Cek session Supabase
-        const sessionRequest =
-            supabaseClient.auth.getSession();
-
-
-        // Timeout 10 detik
-        const timeout =
-            new Promise((resolve) => {
-
-                setTimeout(() => {
-
-                    resolve({
-                        data: {
-                            session: null
-                        },
-                        error: new Error(
-                            "Session check timeout"
-                        )
-                    });
-
-                }, 10000);
-
-            });
-
-
-        const {
-            data,
-            error
-        } =
-            await Promise.race([
-                sessionRequest,
-                timeout
-            ]);
-
-
-        if (error) {
-
-            console.error(
-                "Session:",
-                error
-            );
-
+        if (loadingText) {
+            loadingText.textContent = "Memeriksa akun...";
         }
 
+        const { data, error } = await withTimeout(
+            supabaseClient.auth.getSession(),
+            10000,
+            "Pemeriksaan akun"
+        );
 
-        // ==========================================
-        // ADA SESSION
-        // ==========================================
+        if (error) {
+            throw error;
+        }
 
-        if (
-            data &&
-            data.session &&
-            data.session.user
-        ) {
+        if (data?.session?.user) {
 
-            currentUser =
-                data.session.user;
-
-
-            // Langsung masuk aplikasi
+            currentUser = data.session.user;
             enterApplication();
 
-
-            // Muat data setelah aplikasi tampil
-            try {
-
-                await createProfileIfNeeded();
-
-                await initializeUserData();
-
-            } catch (error) {
-
-                console.error(
-                    "Gagal memuat data pengguna:",
-                    error
-                );
-
-                showToast(
-                    "Sebagian data belum dapat dimuat."
-                );
-
+            if (loadingText) {
+                loadingText.textContent = "Memuat data...";
             }
 
+            try {
+                await withTimeout(
+                    createProfileIfNeeded(),
+                    10000,
+                    "Pembuatan profil"
+                );
+            } catch (error) {
+                console.error("Profile init:", error);
+            }
 
+            await initializeUserDataSafe();
             return;
         }
 
-
-        // ==========================================
-        // TIDAK ADA SESSION
-        // ==========================================
-
         if (authPage) {
-
-            authPage.style.display =
-                "flex";
-
+            authPage.style.display = "flex";
         }
-
 
     } catch (error) {
 
-        console.error(
-            "Gagal memeriksa session:",
-            error
-        );
+        console.error("Gagal memeriksa session:", error);
 
-
-        // Jika pengecekan session gagal,
-        // tetap tampilkan halaman login
         if (authPage) {
-
-            authPage.style.display =
-                "flex";
-
+            authPage.style.display = "flex";
         }
 
+        setAuthMessage(
+            "Sesi belum dapat diperiksa. Silakan login kembali."
+        );
 
     } finally {
 
-        // Loading selalu dihentikan
         if (loadingScreen) {
-
-            loadingScreen.style.display =
-                "none";
-
+            loadingScreen.style.display = "none";
         }
-
     }
-
 }
 
 supabaseClient.auth.onAuthStateChange(
@@ -6574,20 +5948,6 @@ document.addEventListener(
 
 
 /* =========================================================
-   PREWEDDING EVENTS
-========================================================= */
-
-document.addEventListener("change", function(event) {
-
-    if (event.target.id !== "prewedPhotoInput") {
-        return;
-    }
-
-    uploadPrewedPhotos(event.target.files);
-});
-
-
-/* =========================================================
    EVENT HANDLERS - NO INLINE EVENTS
 ========================================================= */
 
@@ -6678,9 +6038,6 @@ document.addEventListener("click", async function(event) {
                 break;
             case "add-task":
                 await addChecklistTask(id);
-                break;
-            case "delete-prewed-photo":
-                await deletePrewedPhoto(id);
                 break;
         }
     } catch (error) {
